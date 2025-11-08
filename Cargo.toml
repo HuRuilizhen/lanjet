@@ -11,3 +11,4 @@ keywords = ["file-sharing", "lan", "http-server", "cli"]
 categories = ["command-line-utilities", "network-programming"]
 
 [dependencies]
+clap = { version = "4.5.51", features = ["derive"] }
