@@ -1,3 +1,4 @@
+use crate::context::ServerContext;
 use clap::Parser;
 use colored::Colorize;
 use std::{
@@ -32,7 +33,7 @@ pub struct Args {
     path: String,
 
     #[arg(long, default_value = "80", help = "port used by the service")]
-    port: i32,
+    port: u16,
 }
 
 fn parse_path(path: String) -> Result<Vec<PathBuf>, String> {
@@ -61,7 +62,7 @@ fn parse_path(path: String) -> Result<Vec<PathBuf>, String> {
     Ok(files)
 }
 
-pub fn parse() -> (Vec<PathBuf>, i32) {
+pub fn parse() -> ServerContext {
     let args = Args::parse();
 
     let files = match parse_path(args.path) {
@@ -74,5 +75,8 @@ pub fn parse() -> (Vec<PathBuf>, i32) {
 
     let port = args.port;
 
-    (files, port)
+    ServerContext {
+        files: files,
+        port: port,
+    }
 }

@@ -1,10 +1,12 @@
-use crate::cli::parse;
-use std::path::PathBuf;
 mod cli;
+mod context;
+mod server;
 
-fn main() {
-    let (files, _): (Vec<PathBuf>, i32) = parse();
-    for file in files {
-        println!("[FILE] {}", file.file_name().unwrap().to_str().unwrap());
-    }
+use cli::parse;
+use context::ServerContext;
+
+#[tokio::main]
+async fn main() {
+    let server_context: ServerContext = parse();
+    server::start(server_context).await.unwrap();
 }
