@@ -2,8 +2,10 @@ mod handler;
 mod state;
 
 use crate::{cli::ServerContext, server::state::AppState};
-use axum::{Router, routing::get};
-use std::{io::Error, net::SocketAddr};
+use axum::{routing::get, Router};
+use colored::{self, Colorize};
+use std::{io::Error, net::SocketAddr, process::exit};
+use tokio::net::TcpListener;
 
 pub async fn start(server_context: ServerContext) -> Result<(), Error> {
     let port = server_context.port;
@@ -14,5 +16,13 @@ pub async fn start(server_context: ServerContext) -> Result<(), Error> {
         .route("/file/{path}", get(handler::download_file))
         .with_state(app_state);
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
-    axum::serve(tokio::net::TcpListener::bind(addr).await.unwrap(), app).await
+    let listener = match TcpListener::bind(addr).await {
+        Ok(listener) => listener,
+        Err(err) => {
+            eprintln!("{}: {}", "error".red().bold(), err);
+            exit(0);
+        }
+    };
+
+    axum::serve(listener, app).await
 }

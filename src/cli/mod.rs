@@ -71,7 +71,7 @@ pub fn parse() -> ServerContext {
     let (base_dir, files) = match parse_path(args.path) {
         Ok((base_dir, files)) => (base_dir, files),
         Err(err) => {
-            println!("{}: {err}", "error".red().bold());
+            eprintln!("{}: {}", "error".red().bold(), err);
             exit(1);
         }
     };
