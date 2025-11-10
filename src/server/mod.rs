@@ -13,7 +13,7 @@ pub async fn start(server_context: ServerContext) -> Result<(), Error> {
 
     let app = Router::new()
         .route("/files", get(handler::list_files))
-        .route("/file/{path}", get(handler::download_file))
+        .route("/file/{*path}", get(handler::download_file))
         .with_state(app_state);
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
     let listener = match TcpListener::bind(addr).await {
