@@ -1,6 +1,8 @@
-use crate::context::ServerContext;
+mod context;
+
 use clap::Parser;
 use colored::Colorize;
+pub use context::ServerContext;
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -36,7 +38,7 @@ pub struct Args {
     port: u16,
 }
 
-fn parse_path(path: String) -> Result<Vec<PathBuf>, String> {
+fn parse_path(path: String) -> Result<(PathBuf, Vec<PathBuf>), String> {
     let path: &Path = Path::new(&path);
 
     if !path.exists() {
@@ -44,10 +46,11 @@ fn parse_path(path: String) -> Result<Vec<PathBuf>, String> {
     }
 
     let mut files: Vec<PathBuf> = Vec::new();
+    let base_dir: PathBuf = path.to_path_buf();
 
     if !path.is_dir() {
         files.push(path.to_path_buf());
-        return Ok(files);
+        return Ok((base_dir.parent().unwrap().to_path_buf(), files));
     }
 
     for entry in fs::read_dir(path).unwrap() {
@@ -59,14 +62,14 @@ fn parse_path(path: String) -> Result<Vec<PathBuf>, String> {
         files.push(entry);
     }
 
-    Ok(files)
+    Ok((base_dir, files))
 }
 
 pub fn parse() -> ServerContext {
     let args = Args::parse();
 
-    let files = match parse_path(args.path) {
-        Ok(files) => files,
+    let (base_dir, files) = match parse_path(args.path) {
+        Ok((base_dir, files)) => (base_dir, files),
         Err(err) => {
             println!("{}: {err}", "error".red().bold());
             exit(1);
@@ -76,6 +79,7 @@ pub fn parse() -> ServerContext {
     let port = args.port;
 
     ServerContext {
+        base_dir: base_dir,
         files: files,
         port: port,
     }

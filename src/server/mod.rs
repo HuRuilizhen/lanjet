@@ -1,8 +1,8 @@
-use crate::context::ServerContext;
+mod handler;
+
+use crate::cli::ServerContext;
 use axum::{Router, routing::get};
 use std::{io::Error, net::SocketAddr};
-
-mod handler;
 
 pub async fn start(server_context: ServerContext) -> Result<(), Error> {
     let app = Router::new()

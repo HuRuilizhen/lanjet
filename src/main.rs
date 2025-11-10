@@ -1,9 +1,7 @@
 mod cli;
-mod context;
 mod server;
 
-use cli::parse;
-use context::ServerContext;
+use cli::{ServerContext, parse};
 
 #[tokio::main]
 async fn main() {
