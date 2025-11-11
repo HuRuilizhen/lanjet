@@ -5,6 +5,7 @@ use axum::extract::State as AxumState;
 use axum::http::{header, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::Json;
+use mime_guess::from_path;
 use serde_json::json;
 use std::path::PathBuf;
 use tokio_util::io::ReaderStream;
@@ -33,9 +34,10 @@ pub async fn download_file(
 
     let stream = ReaderStream::new(file);
     let body = Body::from_stream(stream);
+    let mime_type = from_path(&absolute_path).first_or_octet_stream();
 
     Response::builder()
-        .header(header::CONTENT_TYPE, "application/octet-stream")
+        .header(header::CONTENT_TYPE, mime_type.as_ref())
         .header(
             header::CONTENT_DISPOSITION,
             format!("attachment; filename=\"{}\"", path),
