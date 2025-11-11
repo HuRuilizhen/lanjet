@@ -7,11 +7,12 @@ use colored::{self, Colorize};
 use std::{io::Error, net::SocketAddr, process::exit};
 use tokio::net::TcpListener;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
-use tracing::Level;
+use tracing::{info, Level};
 use tracing_subscriber::fmt;
 
 pub async fn start(server_context: ServerContext) -> Result<(), Error> {
     let port = server_context.port;
+    let base_dir = server_context.base_dir.canonicalize().unwrap();
     let app_state = AppState::from(server_context);
 
     fmt::init();
@@ -33,6 +34,9 @@ pub async fn start(server_context: ServerContext) -> Result<(), Error> {
             exit(0);
         }
     };
+
+    info!("🚀 Lanjet service started");
+    info!("📂 Base directory: {}", base_dir.display());
 
     axum::serve(listener, app).await
 }
