@@ -3,7 +3,7 @@ mod context;
 use clap::Parser;
 use colored::Colorize;
 pub use context::ServerContext;
-use std::fs::read_dir;
+use std::fs::{self, read_dir};
 use std::{
     path::{Path, PathBuf},
     process::exit,
@@ -83,12 +83,18 @@ pub fn parse() -> ServerContext {
             exit(1);
         }
     };
+    let total_size = files
+        .iter()
+        .filter_map(|path| fs::metadata(path).ok())
+        .map(|meta| meta.len())
+        .sum();
 
     let port = args.port;
 
     ServerContext {
-        base_dir: base_dir,
-        files: files,
-        port: port,
+        base_dir,
+        files,
+        total_size,
+        port,
     }
 }

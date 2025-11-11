@@ -13,6 +13,8 @@ use tracing_subscriber::fmt;
 pub async fn start(server_context: ServerContext) -> Result<(), Error> {
     let port = server_context.port;
     let base_dir = server_context.base_dir.canonicalize().unwrap();
+    let total_size = server_context.total_size;
+    let count = server_context.files.len();
     let app_state = AppState::from(server_context);
 
     fmt::init();
@@ -37,6 +39,11 @@ pub async fn start(server_context: ServerContext) -> Result<(), Error> {
 
     info!("🚀 Lanjet service started");
     info!("📂 Base directory: {}", base_dir.display());
+    info!(
+        "🧮 Serving {} files ({:.2} KB total)",
+        count,
+        total_size as f64 / 1024.0
+    );
 
     axum::serve(listener, app).await
 }
