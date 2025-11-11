@@ -22,6 +22,7 @@ async fn shutdown_signal() {
 pub async fn start(server_context: ServerContext) -> Result<(), Error> {
     let port = server_context.port;
     let base_dir = server_context.base_dir.canonicalize().unwrap();
+    let ignore = server_context.ignore.clone();
     let total_size = server_context.total_size;
     let count = server_context.files.len();
     let app_state = AppState::from(server_context);
@@ -48,6 +49,7 @@ pub async fn start(server_context: ServerContext) -> Result<(), Error> {
 
     info!("🚀 Lanjet service started");
     info!("📂 Base directory: {}", base_dir.display());
+    info!("🕶️ Ignoring ruleset: {}", base_dir.join(ignore).display());
     info!(
         "🧮 Serving {} files ({:.2} KB total)",
         count,
