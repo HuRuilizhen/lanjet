@@ -11,6 +11,14 @@ use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, Tr
 use tracing::{info, Level};
 use tracing_subscriber::fmt;
 
+async fn shutdown_signal() {
+    tokio::signal::ctrl_c()
+        .await
+        .expect("failed to listen for <CTRL+C>");
+
+    tracing::info!("🛑 Received shutdown signal, shutting down...");
+}
+
 pub async fn start(server_context: ServerContext) -> Result<(), Error> {
     let port = server_context.port;
     let base_dir = server_context.base_dir.canonicalize().unwrap();
@@ -49,5 +57,7 @@ pub async fn start(server_context: ServerContext) -> Result<(), Error> {
     info!("🌐 Serving at http://{}:{}", local_ip().unwrap(), port);
     info!("🌐 Serving at http://{}:{}", local_ipv6().unwrap(), port);
 
-    axum::serve(listener, app).await
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await
 }
