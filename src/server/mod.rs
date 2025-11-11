@@ -4,7 +4,7 @@ mod state;
 use crate::{cli::ServerContext, server::state::AppState};
 use axum::{routing::get, Router};
 use colored::{self, Colorize};
-use local_ip_address::{local_ip, local_ipv6};
+use local_ip_address::local_ip;
 use std::{io::Error, net::SocketAddr, process::exit};
 use tokio::net::TcpListener;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
@@ -55,7 +55,6 @@ pub async fn start(server_context: ServerContext) -> Result<(), Error> {
     );
     info!("🌐 Serving at http://{}:{}", "127.0.0.1", port);
     info!("🌐 Serving at http://{}:{}", local_ip().unwrap(), port);
-    info!("🌐 Serving at http://{}:{}", local_ipv6().unwrap(), port);
 
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
