@@ -1,4 +1,5 @@
 mod cli;
+mod matcher;
 mod server;
 
 use cli::{ServerContext, parse};

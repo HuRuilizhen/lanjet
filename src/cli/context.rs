@@ -4,6 +4,7 @@ use std::path::PathBuf;
 pub struct ServerContext {
     pub base_dir: PathBuf,
     pub files: Vec<PathBuf>,
+    pub ignore: PathBuf,
     pub total_size: u64,
     pub port: u16,
 }

@@ -1,5 +1,6 @@
 mod context;
 
+use crate::matcher::Matcher;
 use clap::Parser;
 use colored::Colorize;
 pub use context::ServerContext;
@@ -36,24 +37,32 @@ pub struct Args {
 
     #[arg(long, default_value = "80", help = "port used by the service")]
     port: u16,
+
+    #[arg(
+        short,
+        long,
+        default_value = ".lanjetignore",
+        help = "ignore rule file when finding files"
+    )]
+    ignore: String,
 }
 
-fn get_files(path: &Path, files: &mut Vec<PathBuf>) {
+fn get_files(path: &Path, files: &mut Vec<PathBuf>, matcher: &Matcher) {
     if !path.is_dir() {
         return;
     }
 
     for entry in read_dir(path).into_iter().flatten() {
         let entry = entry.unwrap().path();
-        if entry.is_dir() {
-            get_files(&entry, files);
+        if entry.is_dir() && !matcher.is_matched(&entry) {
+            get_files(&entry, files, matcher);
         }
 
         files.push(entry);
     }
 }
 
-fn parse_path(path: String) -> Result<(PathBuf, Vec<PathBuf>), String> {
+fn parse_path(path: String, ignore_file: String) -> Result<(PathBuf, Vec<PathBuf>), String> {
     let path: &Path = Path::new(&path);
 
     if !path.exists() {
@@ -62,13 +71,14 @@ fn parse_path(path: String) -> Result<(PathBuf, Vec<PathBuf>), String> {
 
     let mut files: Vec<PathBuf> = Vec::new();
     let base_dir: PathBuf = path.to_path_buf();
+    let matcher = Matcher::new(&base_dir, ignore_file);
 
     if !path.is_dir() {
         files.push(path.to_path_buf());
         return Ok((base_dir.parent().unwrap().to_path_buf(), files));
     }
 
-    get_files(&path, &mut files);
+    get_files(&path, &mut files, &matcher);
 
     Ok((base_dir, files))
 }
@@ -76,7 +86,9 @@ fn parse_path(path: String) -> Result<(PathBuf, Vec<PathBuf>), String> {
 pub fn parse() -> ServerContext {
     let args = Args::parse();
 
-    let (base_dir, files) = match parse_path(args.path) {
+    let ignore = PathBuf::from(&args.ignore);
+
+    let (base_dir, files) = match parse_path(args.path, args.ignore) {
         Ok((base_dir, files)) => (base_dir, files),
         Err(err) => {
             eprintln!("{}: {}", "error".red().bold(), err);
@@ -94,6 +106,7 @@ pub fn parse() -> ServerContext {
     ServerContext {
         base_dir,
         files,
+        ignore,
         total_size,
         port,
     }

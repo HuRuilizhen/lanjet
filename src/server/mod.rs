@@ -4,16 +4,25 @@ mod state;
 use crate::{cli::ServerContext, server::state::AppState};
 use axum::{routing::get, Router};
 use colored::{self, Colorize};
-use local_ip_address::{local_ip, local_ipv6};
+use local_ip_address::local_ip;
 use std::{io::Error, net::SocketAddr, process::exit};
 use tokio::net::TcpListener;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tracing::{info, Level};
 use tracing_subscriber::fmt;
 
+async fn shutdown_signal() {
+    tokio::signal::ctrl_c()
+        .await
+        .expect("failed to listen for <CTRL+C>");
+
+    tracing::info!("🛑 Received shutdown signal, shutting down...");
+}
+
 pub async fn start(server_context: ServerContext) -> Result<(), Error> {
     let port = server_context.port;
     let base_dir = server_context.base_dir.canonicalize().unwrap();
+    let ignore = server_context.ignore.clone();
     let total_size = server_context.total_size;
     let count = server_context.files.len();
     let app_state = AppState::from(server_context);
@@ -40,6 +49,7 @@ pub async fn start(server_context: ServerContext) -> Result<(), Error> {
 
     info!("🚀 Lanjet service started");
     info!("📂 Base directory: {}", base_dir.display());
+    info!("🕶️ Ignoring ruleset: {}", base_dir.join(ignore).display());
     info!(
         "🧮 Serving {} files ({:.2} KB total)",
         count,
@@ -47,7 +57,8 @@ pub async fn start(server_context: ServerContext) -> Result<(), Error> {
     );
     info!("🌐 Serving at http://{}:{}", "127.0.0.1", port);
     info!("🌐 Serving at http://{}:{}", local_ip().unwrap(), port);
-    info!("🌐 Serving at http://{}:{}", local_ipv6().unwrap(), port);
 
-    axum::serve(listener, app).await
+    axum::serve(listener, app)
+        .with_graceful_shutdown(shutdown_signal())
+        .await
 }
