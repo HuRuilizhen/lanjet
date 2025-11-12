@@ -43,7 +43,10 @@ cargo install --git https://github.com/HuRuilizhen/lanjet.git
 lanjet
 
 # Share specific directory
-lanjet --dir /path/to/your/files
+lanjet --path /path/to/your/files
+
+# Set ignore rules
+lanjet --ignore /path/to/your/ignore/file
 
 # Start with specific port
 lanjet --port 8080
