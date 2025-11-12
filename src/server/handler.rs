@@ -35,7 +35,14 @@ pub async fn download_file(
     let stream = ReaderStream::new(file);
     let body = Body::from_stream(stream);
     let mime_type = from_path(&absolute_path).first_or_octet_stream();
-    let inline = mime_type.type_() == "image" || mime_type.type_() == "text";
+    let inline = match (mime_type.type_().as_str(), mime_type.subtype().as_str()) {
+        ("image", _) => true,
+        ("text", _) => true,
+        ("application", "pdf") => true,
+        ("application", "json") => true,
+        ("application", "xml") => true,
+        _ => false,
+    };
     let disposition = if inline {
         format!("inline; filename=\"{}\"", path)
     } else {
