@@ -1,6 +1,7 @@
 # LanJet 🚀
 
 ![Rust Version](https://img.shields.io/badge/rust-1.90+-orange)
+![Build Status](https://img.shields.io/github/actions/workflow/status/HuRuilizhen/lanjet/rust.yml?branch=release)
 
 A blazing-fast LAN file sharing tool built with Rust, making file distribution simple and efficient.
 
