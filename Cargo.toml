@@ -1,11 +1,12 @@
 [package]
 name = "lanjet"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 authors = ["HuRuilizhen <huruilizhen@gmail.com>"]
 description = " A blazing fast LAN file sharing tool built with Rust"
 license = "MIT"
 repository = "https://github.com/HuRuilizhen/lanjet"
+homepage = "https://github.com/HuRuilizhen/lanjet"
 readme = "README.md"
 keywords = ["file-sharing", "lan", "http-server", "cli"]
 categories = ["command-line-utilities", "network-programming"]
