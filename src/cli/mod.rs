@@ -56,9 +56,9 @@ fn get_files(path: &Path, files: &mut Vec<PathBuf>, matcher: &Matcher) {
         let entry = entry.unwrap().path();
         if entry.is_dir() && !matcher.is_matched(&entry) {
             get_files(&entry, files, matcher);
+        } else {
+            files.push(entry);
         }
-
-        files.push(entry);
     }
 }
 
