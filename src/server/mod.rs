@@ -38,7 +38,7 @@ pub async fn start(server_context: ServerContext) -> Result<(), Error> {
                 .on_request(DefaultOnRequest::new().level(Level::INFO))
                 .on_response(DefaultOnResponse::new().level(Level::INFO)),
         );
-    let addr = SocketAddr::from(([127, 0, 0, 1], port));
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
     let listener = match TcpListener::bind(addr).await {
         Ok(listener) => listener,
         Err(err) => {
@@ -55,7 +55,7 @@ pub async fn start(server_context: ServerContext) -> Result<(), Error> {
         count,
         total_size as f64 / 1024.0
     );
-    info!("🌐 Serving at http://{}:{}", "127.0.0.1", port);
+    info!("🌐 Serving at http://{}:{}", addr.ip(), port);
     info!("🌐 Serving at http://{}:{}", local_ip().unwrap(), port);
 
     axum::serve(listener, app)
