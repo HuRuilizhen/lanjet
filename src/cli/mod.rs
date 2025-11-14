@@ -82,7 +82,7 @@ fn parse_path(path: String, ignore_file: String) -> Result<(PathBuf, Vec<PathBuf
         return Ok((base_dir.parent().unwrap().to_path_buf(), files));
     }
 
-    get_files(&path, &mut files, &matcher);
+    get_files(path, &mut files, &matcher);
 
     Ok((base_dir, files))
 }
