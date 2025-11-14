@@ -5,7 +5,7 @@ use crate::{cli::ServerContext, server::state::AppState};
 use axum::{routing::get, Router};
 use colored::{self, Colorize};
 use local_ip_address::local_ip;
-use std::{io::Error, net::SocketAddr, process::exit};
+use std::{io::Error, process::exit};
 use tokio::net::TcpListener;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tracing::{info, Level};
@@ -20,11 +20,11 @@ async fn shutdown_signal() {
 }
 
 pub async fn start(server_context: ServerContext) -> Result<(), Error> {
-    let port = server_context.port;
     let base_dir = server_context.base_dir.canonicalize().unwrap();
     let ignore = server_context.ignore.clone();
     let total_size = server_context.total_size;
     let count = server_context.files.len();
+    let addr = server_context.addr;
     let app_state = AppState::from(server_context);
 
     fmt::init();
@@ -38,7 +38,6 @@ pub async fn start(server_context: ServerContext) -> Result<(), Error> {
                 .on_request(DefaultOnRequest::new().level(Level::INFO))
                 .on_response(DefaultOnResponse::new().level(Level::INFO)),
         );
-    let addr = SocketAddr::from(([0, 0, 0, 0], port));
     let listener = match TcpListener::bind(addr).await {
         Ok(listener) => listener,
         Err(err) => {
@@ -55,8 +54,12 @@ pub async fn start(server_context: ServerContext) -> Result<(), Error> {
         count,
         total_size as f64 / 1024.0
     );
-    info!("🌐 Serving at http://{}:{}", addr.ip(), port);
-    info!("🌐 Serving at http://{}:{}", local_ip().unwrap(), port);
+    info!("🌐 Serving at http://{}:{}", addr.ip(), addr.port());
+    info!(
+        "🌐 Serving at http://{}:{}",
+        local_ip().unwrap(),
+        addr.port()
+    );
 
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())

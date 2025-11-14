@@ -5,6 +5,7 @@ use clap::Parser;
 use colored::Colorize;
 pub use context::ServerContext;
 use std::fs::{self, read_dir};
+use std::net::SocketAddr;
 use std::{
     path::{Path, PathBuf},
     process::exit,
@@ -45,6 +46,9 @@ pub struct Args {
         help = "ignore rule file when finding files"
     )]
     ignore: String,
+
+    #[arg(long, help = "server on local machine")]
+    local_only: bool,
 }
 
 fn get_files(path: &Path, files: &mut Vec<PathBuf>, matcher: &Matcher) {
@@ -102,12 +106,16 @@ pub fn parse() -> ServerContext {
         .sum();
 
     let port = args.port;
+    let addr = match args.local_only {
+        true => SocketAddr::from(([127, 0, 0, 1], port)),
+        false => SocketAddr::from(([0, 0, 0, 0], port)),
+    };
 
     ServerContext {
         base_dir,
         files,
         ignore,
         total_size,
-        port,
+        addr,
     }
 }
