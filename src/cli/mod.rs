@@ -3,7 +3,7 @@ mod context;
 use crate::matcher::Matcher;
 use clap::Parser;
 use colored::Colorize;
-pub use context::ServerContext;
+pub use context::{BannerContext, ServerContext};
 use std::fs::{self, read_dir};
 use std::net::SocketAddr;
 use std::{
@@ -87,7 +87,7 @@ fn parse_path(path: String, ignore_file: String) -> Result<(PathBuf, Vec<PathBuf
     Ok((base_dir, files))
 }
 
-pub fn parse() -> ServerContext {
+pub fn parse() -> (BannerContext, ServerContext) {
     let args = Args::parse();
 
     let ignore = PathBuf::from(&args.ignore);
@@ -111,11 +111,18 @@ pub fn parse() -> ServerContext {
         false => SocketAddr::from(([0, 0, 0, 0], port)),
     };
 
-    ServerContext {
-        base_dir,
-        files,
-        ignore,
-        total_size,
-        addr,
-    }
+    (
+        BannerContext {
+            addr,
+            base_dir: base_dir.clone(),
+            ignore,
+            files_count: files.len(),
+            total_size,
+        },
+        ServerContext {
+            base_dir,
+            files,
+            addr,
+        },
+    )
 }
