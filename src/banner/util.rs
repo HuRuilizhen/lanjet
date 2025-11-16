@@ -28,11 +28,11 @@ pub fn human_size(bytes: u64) -> String {
 }
 
 #[cfg(windows)]
-pub fn canon(p: &Path) -> PathBuf {
-    canonicalize(p).unwrap_or(p.to_path_buf())
+pub fn canon(path: &Path) -> PathBuf {
+    canonicalize(path).unwrap_or(path.to_path_buf())
 }
 
 #[cfg(not(windows))]
-pub fn canon(p: &Path) -> PathBuf {
-    p.canonicalize().unwrap_or(p.to_path_buf())
+pub fn canon(path: &Path) -> PathBuf {
+    path.canonicalize().unwrap_or(path.to_path_buf())
 }
