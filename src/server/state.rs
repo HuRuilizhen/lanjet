@@ -15,7 +15,7 @@ impl From<ServerContext> for AppState {
 
         for file_path in &server_context.files {
             let relative_path: PathBuf = diff_paths(file_path, &server_context.base_dir).unwrap();
-            path_set.insert(relative_path.display().to_string());
+            path_set.insert(relative_path.display().to_string().replace("\\", "/"));
         }
 
         Self {
