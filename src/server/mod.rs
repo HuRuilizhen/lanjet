@@ -1,9 +1,11 @@
 mod handler;
 mod state;
 
-use crate::{cli::ServerContext, server::state::AppState};
-use axum::{Router, routing::get};
+use crate::banner::show_banner;
+use crate::cli::{BannerContext, ServerContext};
+use axum::{routing::get, Router};
 use colored::{self, Colorize};
+use state::AppState;
 use std::{io::Error, process::exit};
 use tokio::net::TcpListener;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
@@ -18,7 +20,10 @@ async fn shutdown_signal() {
     tracing::info!("🛑 Received shutdown signal, shutting down...");
 }
 
-pub async fn start(server_context: ServerContext) -> Result<(), Error> {
+pub async fn start(
+    banner_context: BannerContext,
+    server_context: ServerContext,
+) -> Result<(), Error> {
     let addr = server_context.addr;
     let app_state = AppState::from(server_context);
 
@@ -40,6 +45,8 @@ pub async fn start(server_context: ServerContext) -> Result<(), Error> {
             exit(0);
         }
     };
+
+    show_banner(banner_context);
 
     axum::serve(listener, app)
         .with_graceful_shutdown(shutdown_signal())
