@@ -1,10 +1,11 @@
 mod util;
 
 use crate::cli::BannerContext;
+use crate::util::human_size;
 use colored::*;
 use local_ip_address::local_ip;
 use qrcode::{render::unicode, QrCode};
-use util::{canon, human_size, label};
+use util::{canon, label};
 
 pub fn show_banner(banner_context: BannerContext) {
     let addr = banner_context.addr;

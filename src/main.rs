@@ -2,6 +2,7 @@ mod banner;
 mod cli;
 mod matcher;
 mod server;
+mod util;
 
 use cli::parse;
 
