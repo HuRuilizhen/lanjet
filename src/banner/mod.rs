@@ -1,7 +1,7 @@
 use crate::cli::BannerContext;
 use colored::*;
 use local_ip_address::local_ip;
-use qrcode::{render::unicode, QrCode};
+use qrcode::{QrCode, render::unicode};
 use unicode_width::UnicodeWidthStr;
 
 const LABEL_PAD: usize = 15;

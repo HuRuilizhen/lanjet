@@ -2,7 +2,7 @@ mod handler;
 mod state;
 
 use crate::{cli::ServerContext, server::state::AppState};
-use axum::{routing::get, Router};
+use axum::{Router, routing::get};
 use colored::{self, Colorize};
 use std::{io::Error, process::exit};
 use tokio::net::TcpListener;
