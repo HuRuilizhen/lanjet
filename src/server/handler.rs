@@ -11,6 +11,7 @@ use mime_guess::from_path;
 use serde_json::json;
 use std::path::PathBuf;
 use tokio_util::io::ReaderStream;
+use urlencoding::encode;
 
 pub async fn index_page(AxumState(state): AxumState<AppState>) -> impl IntoResponse {
     let files = &state.path_set;
@@ -30,8 +31,10 @@ pub async fn index_page(AxumState(state): AxumState<AppState>) -> impl IntoRespo
                         @for file in files {
                             li {
                                 div class="file-name" {
+                                    @let encoded = encode(file);
+
                                     (file_icon(file))
-                                    a href=(format!("/file/{}", file)) { (file) }
+                                    a href=(format!("/file/{}", encoded)) { (file) }
                                 }
                                 span class="file-size" {
                                     (human_size(meta_data[file].len()))
