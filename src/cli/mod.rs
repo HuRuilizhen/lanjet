@@ -61,7 +61,12 @@ fn get_files(path: &Path, files: &mut Vec<PathBuf>, matcher: &Matcher) {
 
     for entry in read_dir(path).into_iter().flatten() {
         let entry = entry.unwrap().path();
-        if entry.is_dir() && !matcher.is_matched(&entry) {
+
+        if matcher.is_matched(&entry) {
+            continue;
+        }
+
+        if entry.is_dir() {
             get_files(&entry, files, matcher);
         } else {
             files.push(entry);

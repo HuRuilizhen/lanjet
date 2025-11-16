@@ -1,5 +1,7 @@
 mod handler;
 mod state;
+mod style;
+mod util;
 
 use crate::banner::show_banner;
 use crate::cli::{BannerContext, ServerContext};
@@ -29,6 +31,7 @@ pub async fn start(
 
     fmt::init();
     let app = Router::new()
+        .route("/", get(handler::index_page))
         .route("/files", get(handler::list_files))
         .route("/file/{*path}", get(handler::download_file))
         .with_state(app_state)
