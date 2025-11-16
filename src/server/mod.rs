@@ -1,6 +1,7 @@
 mod handler;
 mod state;
 mod style;
+mod util;
 
 use crate::banner::show_banner;
 use crate::cli::{BannerContext, ServerContext};

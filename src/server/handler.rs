@@ -1,4 +1,5 @@
-use super::{state::AppState, style::inline_css};
+use super::{state::AppState, style::inline_css, util::file_icon};
+use crate::util::human_size;
 use axum::body::Body;
 use axum::extract::Path as AxumPath;
 use axum::extract::State as AxumState;
@@ -13,6 +14,7 @@ use tokio_util::io::ReaderStream;
 
 pub async fn index_page(AxumState(state): AxumState<AppState>) -> impl IntoResponse {
     let files = &state.path_set;
+    let meta_data = &state.meta_data;
 
     let markup: Markup = html! {
         html {
@@ -22,12 +24,23 @@ pub async fn index_page(AxumState(state): AxumState<AppState>) -> impl IntoRespo
                 style { (inline_css()) }
             }
             body {
-                h1 { "✈️ LanJet" }
-                ul {
-                    @for file in files {
-                        li {
-                            a href=(format!("/file/{}", file)) { (file) }
+                div class="container" {
+                    h1 { "✈️ LanJet" }
+                    ul {
+                        @for file in files {
+                            li {
+                                div class="file-name" {
+                                    (file_icon(file))
+                                    a href=(format!("/file/{}", file)) { (file) }
+                                }
+                                span class="file-size" {
+                                    (human_size(meta_data[file].len()))
+                                }
+                            }
                         }
+                    }
+                    footer {
+                        "Powered by LanJet"
                     }
                 }
             }
