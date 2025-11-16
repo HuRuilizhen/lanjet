@@ -49,6 +49,9 @@ pub struct Args {
 
     #[arg(long, help = "server on local machine")]
     local_only: bool,
+
+    #[arg(long, help = "generate qr code in banner")]
+    show_qrcode: bool,
 }
 
 fn get_files(path: &Path, files: &mut Vec<PathBuf>, matcher: &Matcher) {
@@ -110,6 +113,7 @@ pub fn parse() -> (BannerContext, ServerContext) {
         true => SocketAddr::from(([127, 0, 0, 1], port)),
         false => SocketAddr::from(([0, 0, 0, 0], port)),
     };
+    let show_qrcode = args.show_qrcode;
 
     (
         BannerContext {
@@ -118,6 +122,7 @@ pub fn parse() -> (BannerContext, ServerContext) {
             ignore,
             files_count: files.len(),
             total_size,
+            show_qrcode,
         },
         ServerContext {
             base_dir,
