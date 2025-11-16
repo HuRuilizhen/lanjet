@@ -3,8 +3,9 @@ mod context;
 use crate::matcher::Matcher;
 use clap::Parser;
 use colored::Colorize;
-pub use context::ServerContext;
+pub use context::{BannerContext, ServerContext};
 use std::fs::{self, read_dir};
+use std::net::SocketAddr;
 use std::{
     path::{Path, PathBuf},
     process::exit,
@@ -45,6 +46,12 @@ pub struct Args {
         help = "ignore rule file when finding files"
     )]
     ignore: String,
+
+    #[arg(long, help = "server on local machine")]
+    local_only: bool,
+
+    #[arg(long, help = "generate qr code in banner")]
+    show_qrcode: bool,
 }
 
 fn get_files(path: &Path, files: &mut Vec<PathBuf>, matcher: &Matcher) {
@@ -78,12 +85,12 @@ fn parse_path(path: String, ignore_file: String) -> Result<(PathBuf, Vec<PathBuf
         return Ok((base_dir.parent().unwrap().to_path_buf(), files));
     }
 
-    get_files(&path, &mut files, &matcher);
+    get_files(path, &mut files, &matcher);
 
     Ok((base_dir, files))
 }
 
-pub fn parse() -> ServerContext {
+pub fn parse() -> (BannerContext, ServerContext) {
     let args = Args::parse();
 
     let ignore = PathBuf::from(&args.ignore);
@@ -102,12 +109,27 @@ pub fn parse() -> ServerContext {
         .sum();
 
     let port = args.port;
+    let local_only = args.local_only;
+    let addr = match local_only {
+        true => SocketAddr::from(([127, 0, 0, 1], port)),
+        false => SocketAddr::from(([0, 0, 0, 0], port)),
+    };
+    let show_qrcode = args.show_qrcode;
 
-    ServerContext {
-        base_dir,
-        files,
-        ignore,
-        total_size,
-        port,
-    }
+    (
+        BannerContext {
+            addr,
+            base_dir: base_dir.clone(),
+            ignore,
+            files_count: files.len(),
+            total_size,
+            local_only,
+            show_qrcode,
+        },
+        ServerContext {
+            base_dir,
+            files,
+            addr,
+        },
+    )
 }

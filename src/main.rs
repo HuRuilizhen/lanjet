@@ -1,11 +1,12 @@
+mod banner;
 mod cli;
 mod matcher;
 mod server;
 
-use cli::{ServerContext, parse};
+use cli::parse;
 
 #[tokio::main]
 async fn main() {
-    let server_context: ServerContext = parse();
-    server::start(server_context).await.unwrap();
+    let (banner_context, server_context) = parse();
+    server::start(banner_context, server_context).await.unwrap();
 }

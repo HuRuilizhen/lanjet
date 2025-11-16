@@ -20,7 +20,7 @@ impl From<ServerContext> for AppState {
 
         Self {
             base_dir: server_context.base_dir,
-            path_set: path_set,
+            path_set,
         }
     }
 }

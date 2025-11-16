@@ -1,10 +1,10 @@
 use super::AppState;
+use axum::Json;
 use axum::body::Body;
 use axum::extract::Path as AxumPath;
 use axum::extract::State as AxumState;
-use axum::http::{header, StatusCode};
+use axum::http::{StatusCode, header};
 use axum::response::{IntoResponse, Response};
-use axum::Json;
 use mime_guess::from_path;
 use serde_json::json;
 use std::path::PathBuf;
@@ -35,14 +35,14 @@ pub async fn download_file(
     let stream = ReaderStream::new(file);
     let body = Body::from_stream(stream);
     let mime_type = from_path(&absolute_path).first_or_octet_stream();
-    let inline = match (mime_type.type_().as_str(), mime_type.subtype().as_str()) {
-        ("image", _) => true,
-        ("text", _) => true,
-        ("application", "pdf") => true,
-        ("application", "json") => true,
-        ("application", "xml") => true,
-        _ => false,
-    };
+    let inline = matches!(
+        (mime_type.type_().as_str(), mime_type.subtype().as_str()),
+        ("image", _)
+            | ("text", _)
+            | ("application", "pdf")
+            | ("application", "json")
+            | ("application", "xml")
+    );
     let disposition = if inline {
         format!("inline; filename=\"{}\"", path)
     } else {
