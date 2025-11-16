@@ -19,8 +19,10 @@ impl From<ServerContext> for AppState {
         for file_path in &server_context.files {
             let relative_path: PathBuf = diff_paths(file_path, &server_context.base_dir).unwrap();
             let path = relative_path.display().to_string().replace("\\", "/");
-            meta_data.insert(path.clone(), file_path.metadata().unwrap());
-            path_set.insert(path);
+            if file_path.metadata().is_ok() {
+                meta_data.insert(path.clone(), file_path.metadata().unwrap());
+                path_set.insert(path);
+            }
         }
 
         Self {
