@@ -1,38 +1,14 @@
+mod util;
+
 use crate::cli::BannerContext;
 use colored::*;
 use local_ip_address::local_ip;
-use qrcode::{render::unicode, QrCode};
-use unicode_width::UnicodeWidthStr;
-
-const LABEL_PAD: usize = 15;
-
-fn label(s: &str) -> String {
-    let width = UnicodeWidthStr::width(s);
-    let padding = if LABEL_PAD > width {
-        LABEL_PAD - width
-    } else {
-        1
-    };
-    format!("{}{}", s, " ".repeat(padding))
-}
-
-fn human_size(bytes: u64) -> String {
-    const UNITS: [&str; 4] = ["B", "KB", "MB", "GB"];
-    let mut size = bytes as f64;
-    let mut idx = 0;
-    while size >= 1024.0 && idx < UNITS.len() - 1 {
-        size /= 1024.0;
-        idx += 1;
-    }
-    format!("{:.2} {}", size, UNITS[idx])
-}
+use qrcode::{QrCode, render::unicode};
+use util::{canon, human_size, label};
 
 pub fn show_banner(banner_context: BannerContext) {
     let addr = banner_context.addr;
-    let base_dir = banner_context
-        .base_dir
-        .canonicalize()
-        .unwrap_or(banner_context.base_dir);
+    let base_dir = canon(&banner_context.base_dir);
     let ignore = &banner_context.ignore;
     let files_count = banner_context.files_count;
     let total_size = human_size(banner_context.total_size);
