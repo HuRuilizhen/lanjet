@@ -1,4 +1,4 @@
-use mime_guess::{from_path, Mime};
+use mime_guess::{Mime, from_path};
 
 pub fn file_icon(path: &str) -> &'static str {
     let mime: Mime = from_path(path).first_or_octet_stream();

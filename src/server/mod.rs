@@ -5,7 +5,7 @@ mod util;
 
 use crate::banner::show_banner;
 use crate::cli::{BannerContext, ServerContext};
-use axum::{routing::get, Router};
+use axum::{Router, routing::get};
 use colored::{self, Colorize};
 use state::AppState;
 use std::{io::Error, process::exit};

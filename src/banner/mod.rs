@@ -4,7 +4,7 @@ use crate::cli::BannerContext;
 use crate::util::human_size;
 use colored::*;
 use local_ip_address::local_ip;
-use qrcode::{render::unicode, QrCode};
+use qrcode::{QrCode, render::unicode};
 use util::{canon, label};
 
 pub fn show_banner(banner_context: BannerContext) {

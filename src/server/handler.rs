@@ -1,12 +1,12 @@
 use super::{state::AppState, style::inline_css, util::file_icon};
 use crate::util::human_size;
+use axum::Json;
 use axum::body::Body;
 use axum::extract::Path as AxumPath;
 use axum::extract::State as AxumState;
-use axum::http::{header, StatusCode};
+use axum::http::{StatusCode, header};
 use axum::response::{Html, IntoResponse, Response};
-use axum::Json;
-use maud::{html, Markup};
+use maud::{Markup, html};
 use mime_guess::from_path;
 use serde_json::json;
 use std::path::PathBuf;
