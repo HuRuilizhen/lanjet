@@ -109,7 +109,8 @@ pub fn parse() -> (BannerContext, ServerContext) {
         .sum();
 
     let port = args.port;
-    let addr = match args.local_only {
+    let local_only = args.local_only;
+    let addr = match local_only {
         true => SocketAddr::from(([127, 0, 0, 1], port)),
         false => SocketAddr::from(([0, 0, 0, 0], port)),
     };
@@ -122,6 +123,7 @@ pub fn parse() -> (BannerContext, ServerContext) {
             ignore,
             files_count: files.len(),
             total_size,
+            local_only,
             show_qrcode,
         },
         ServerContext {

@@ -15,5 +15,6 @@ pub struct BannerContext {
     pub ignore: PathBuf,
     pub files_count: usize,
     pub total_size: u64,
+    pub local_only: bool,
     pub show_qrcode: bool,
 }
