@@ -3,7 +3,7 @@ mod util;
 use crate::cli::BannerContext;
 use colored::*;
 use local_ip_address::local_ip;
-use qrcode::{QrCode, render::unicode};
+use qrcode::{render::unicode, QrCode};
 use util::{canon, human_size, label};
 
 pub fn show_banner(banner_context: BannerContext) {
@@ -48,7 +48,7 @@ pub fn show_banner(banner_context: BannerContext) {
     if show_qr && !local_only {
         println!();
         println!("{}", "📱 Quick Scan:".bright_magenta().bold());
-        if let Ok(code) = QrCode::new(format!("http://{}:{}/files", lan_ip, addr.port())) {
+        if let Ok(code) = QrCode::new(format!("http://{}:{}/", lan_ip, addr.port())) {
             let qr = code.render::<unicode::Dense1x2>().build();
             println!("{}", qr);
         }

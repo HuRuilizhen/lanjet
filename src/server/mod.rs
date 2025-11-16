@@ -1,9 +1,10 @@
 mod handler;
 mod state;
+mod style;
 
 use crate::banner::show_banner;
 use crate::cli::{BannerContext, ServerContext};
-use axum::{Router, routing::get};
+use axum::{routing::get, Router};
 use colored::{self, Colorize};
 use state::AppState;
 use std::{io::Error, process::exit};
@@ -29,6 +30,7 @@ pub async fn start(
 
     fmt::init();
     let app = Router::new()
+        .route("/", get(handler::index_page))
         .route("/files", get(handler::list_files))
         .route("/file/{*path}", get(handler::download_file))
         .with_state(app_state)

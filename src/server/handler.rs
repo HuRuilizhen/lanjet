@@ -1,14 +1,41 @@
-use super::AppState;
-use axum::Json;
+use super::{state::AppState, style::inline_css};
 use axum::body::Body;
 use axum::extract::Path as AxumPath;
 use axum::extract::State as AxumState;
-use axum::http::{StatusCode, header};
-use axum::response::{IntoResponse, Response};
+use axum::http::{header, StatusCode};
+use axum::response::{Html, IntoResponse, Response};
+use axum::Json;
+use maud::{html, Markup};
 use mime_guess::from_path;
 use serde_json::json;
 use std::path::PathBuf;
 use tokio_util::io::ReaderStream;
+
+pub async fn index_page(AxumState(state): AxumState<AppState>) -> impl IntoResponse {
+    let files = &state.path_set;
+
+    let markup: Markup = html! {
+        html {
+            head {
+                meta charset="utf-8";
+                title { "LanJet" }
+                style { (inline_css()) }
+            }
+            body {
+                h1 { "✈️ LanJet" }
+                ul {
+                    @for file in files {
+                        li {
+                            a href=(format!("/file/{}", file)) { (file) }
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    Html(markup.into_string())
+}
 
 pub async fn list_files(AxumState(app_state): AxumState<AppState>) -> impl IntoResponse {
     Json(json!(app_state.path_set))
