@@ -1,64 +1,123 @@
-# LanJet 🚀
+# LanJet — Fast LAN File Sharing in One Command
 
 ![Rust Version](https://img.shields.io/badge/rust-1.90+-orange)
 ![Build Status](https://img.shields.io/github/actions/workflow/status/HuRuilizhen/lanjet/rust.yml?branch=release)
+![Crates.io](https://img.shields.io/crates/v/lanjet)
 
-A blazing-fast LAN file sharing tool built with Rust, making file distribution simple and efficient.
+A blazing-fast, zero-config LAN file sharing tool written in Rust. Start a lightweight HTTP file server with a clean Web UI and QR code access — all in one command.
 
 ## Features
 
-- Basic HTTP file server
-- Simple file listing interface
-- One-click file downloads
+### Core
+
+- Recursive directory scanning
+- Predictable and safe path handling
 - Automatic LAN IP detection
+- MIME type detection
+- Graceful shutdown (`Ctrl+C`)
+- Structured access logs (`tracing` + `tower-http`)
 
-## Requirements
+### CLI & UX
 
-- Rust stable toolchain (1.90+)
-- Supported OS: Windows, macOS, Linux
+- Beautiful startup banner
+- Optional QR code for mobile access
+- Auto-open browser on startup
+- Configurable host binding (`--local-only`)
+- `.lanjetignore` support (similar to `.gitignore`)
 
-## Table of Contents
+### Web UI
 
-- [LanJet 🚀](#lanjet-)
-  - [Features](#features)
-  - [Requirements](#requirements)
-  - [Table of Contents](#table-of-contents)
-  - [Getting Started](#getting-started)
-    - [Installation](#installation)
-    - [Basic Usage](#basic-usage)
-  - [License](#license)
+- Clean HTML interface (no JS, no external assets)
+- Click to download files
+- File icons based on MIME type
+- File metadata (size, type, modified time)
 
-## Getting Started
+## Installation
 
-### Installation
+### Install via Cargo
 
 ```bash
-# Install from source
-cargo install --git https://github.com/HuRuilizhen/lanjet.git
+cargo install lanjet
 ```
 
-### Basic Usage
+### Install via cargo-binstall
 
 ```bash
-# Share current directory using default port 80
+cargo binstall lanjet
+```
+
+## Quick Start
+
+Share the current directory:
+
+```bash
 lanjet
+```
 
-# Share specific directory
-lanjet --path /path/to/your/files
+Share a specific path:
 
-# Set ignore rules
-lanjet --ignore /path/to/your/ignore/file
+```bash
+lanjet --path /path/to/files
+```
 
-# Start with specific port
+Start on a different port:
+
+```bash
 lanjet --port 8080
 ```
 
-For more usage information, run `lanjet --help`.
+Local-only mode:
+
+```bash
+lanjet --local-only
+```
+
+Show QR code in banner:
+
+```bash
+lanjet --show-qrcode
+```
+
+## CLI Options
+
+| Flag            | Description                | Default         |
+| --------------- | -------------------------- | --------------- |
+| `--path`        | File or directory to share | `.`             |
+| `--port`        | Port to bind               | `80`            |
+| `--ignore`      | Ignore rule file           | `.lanjetignore` |
+| `--local-only`  | Bind only to localhost     | `false`         |
+| `--show-qrcode` | Display QR code in banner  | `false`         |
+| `--no-browser`  | Disable auto-open browser  | `false`         |
+| `--no-banner`   | Disable banner             | `false`         |
+
+## Ignore Rules
+
+LanJet supports ignore files similar to `.gitignore`.
+
+Example `.lanjetignore`:
+
+```
+*.log
+*.tmp
+.DS_Store
+node_modules/
+target/
+```
+
+## Web Interface
+
+After starting the service, open:
+
+```
+http://<LAN-IP>:<PORT>
+```
+
+You will see a clean interface listing all files.
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License.
 
 ---
 
-**LanJet** - Making LAN file sharing as fast as a jet! ✈️
+> **LanJet — Making LAN file sharing fast, simple, and beautiful.**
