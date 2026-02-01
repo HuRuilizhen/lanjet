@@ -3,19 +3,90 @@ use crate::util::human_size;
 use axum::Json;
 use axum::body::Body;
 use axum::extract::Path as AxumPath;
+use axum::extract::Query;
 use axum::extract::State as AxumState;
 use axum::http::{StatusCode, header};
 use axum::response::{Html, IntoResponse, Response};
 use maud::{Markup, html};
 use mime_guess::from_path;
+use serde::Deserialize;
 use serde_json::json;
 use std::path::PathBuf;
 use tokio_util::io::ReaderStream;
 use urlencoding::encode;
 
-pub async fn index_page(AxumState(state): AxumState<AppState>) -> impl IntoResponse {
-    let files = &state.path_set;
+#[derive(Debug, Clone, Copy, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum SortKey {
+    Name,
+    Size,
+}
+
+impl Default for SortKey {
+    fn default() -> Self {
+        SortKey::Name
+    }
+}
+
+impl SortKey {
+    fn as_string(&self) -> &'static str {
+        match self {
+            SortKey::Name => "name",
+            SortKey::Size => "size",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum SortOrder {
+    Asc,
+    Desc,
+}
+
+impl Default for SortOrder {
+    fn default() -> Self {
+        SortOrder::Asc
+    }
+}
+
+impl SortOrder {
+    fn as_string(&self) -> &'static str {
+        match self {
+            SortOrder::Asc => "asc",
+            SortOrder::Desc => "desc",
+        }
+    }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct IndexQuery {
+    #[serde(default)]
+    pub key: SortKey,
+
+    #[serde(default)]
+    pub order: SortOrder,
+}
+
+pub async fn index_page(
+    AxumState(state): AxumState<AppState>,
+    Query(query): Query<IndexQuery>,
+) -> impl IntoResponse {
+    let mut files: Vec<String> = state.path_set.iter().cloned().collect();
     let meta_data = &state.meta_data;
+
+    match query.key {
+        SortKey::Name => {
+            files.sort();
+        }
+        SortKey::Size => {
+            files.sort_by_key(|f| state.meta_data[f].len());
+        }
+    }
+
+    if matches!(query.order, SortOrder::Asc) {
+        files.reverse();
+    }
 
     let markup: Markup = html! {
         html {
@@ -25,15 +96,36 @@ pub async fn index_page(AxumState(state): AxumState<AppState>) -> impl IntoRespo
                 style { (inline_css()) }
             }
             body {
-                div class="container" {
+                div class="header" {
                     h1 { "✈️ LanJet" }
+                    div class="sort-bar" {
+                        span { "Sort:" }
+                        a
+                            class={ @if matches!(query.key, SortKey::Name) { "active" } @else { "" } }
+                            href=(format!("/?key={}&order={}", SortKey::Name.as_string(), query.order.as_string()))
+                        { "Name" }
+                        span class="sep" { "·" }
+                        a
+                            class={ @if matches!(query.key, SortKey::Size) { "active" } @else { "" } }
+                            href=(format!("/?key={}&order={}", SortKey::Size.as_string(), query.order.as_string()))
+                        { "Size" }
+                        span class="order" {
+                            @if matches!(query.order, SortOrder::Asc) {
+                                a href=( format!("/?key={}&order={}", query.key.as_string(), SortOrder::Desc.as_string()) ) { "↑" }
+                            } @else {
+                                a href=( format!("/?key={}&order={}", query.key.as_string(), SortOrder::Asc.as_string()) ) { "↓" }
+                            }
+                        }
+                    }
+                }
+                div class="container" {
                     ul {
-                        @for file in files {
+                        @for file in &files {
                             li {
                                 div class="file-name" {
                                     @let encoded = encode(file);
 
-                                    (file_icon(file))
+                                    (file_icon(file.clone()))
                                     a href=(format!("/file/{}", encoded)) { (file) }
                                 }
                                 span class="file-size" {

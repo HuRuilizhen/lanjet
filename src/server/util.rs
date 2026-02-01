@@ -1,6 +1,6 @@
 use mime_guess::{Mime, from_path};
 
-pub fn file_icon(path: &str) -> &'static str {
+pub fn file_icon(path: String) -> &'static str {
     let mime: Mime = from_path(path).first_or_octet_stream();
 
     match (mime.type_().as_str(), mime.subtype().as_str()) {

@@ -16,6 +16,41 @@ pub fn inline_css() -> &'static str {
         margin-bottom: 10px;
         color: #222;
     }
+    .header {
+        max-width: 720px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+    }
+    .sort-bar {
+        font-size: 13px;
+        color: #666;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+    .sort-bar a {
+        color: #666;
+        font-weight: 500;
+    }
+    .sort-bar a.active {
+        color: #1a73e8;
+        text-decoration: underline;
+    }
+    .sort-bar .sep {
+        color: #bbb;
+    }
+    .sort-bar .order a {
+        margin-left: 4px;
+        font-size: 12px;
+        color: #999;
+    }
+    .sort-bar .order a:hover {
+        color: #1a73e8;
+    }
     .container {
         max-width: 720px;
         margin: 0 auto;

@@ -1,19 +1,19 @@
 use crate::cli::ServerContext;
 use pathdiff::diff_paths;
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeSet, HashMap};
 use std::fs::Metadata;
 use std::path::PathBuf;
 
 #[derive(Debug, Clone)]
 pub struct AppState {
     pub base_dir: PathBuf,
-    pub path_set: HashSet<String>,
+    pub path_set: BTreeSet<String>,
     pub meta_data: HashMap<String, Metadata>,
 }
 
 impl From<ServerContext> for AppState {
     fn from(server_context: ServerContext) -> Self {
-        let mut path_set: HashSet<String> = HashSet::new();
+        let mut path_set: BTreeSet<String> = BTreeSet::new();
         let mut meta_data: HashMap<String, Metadata> = HashMap::new();
 
         for file_path in &server_context.files {
