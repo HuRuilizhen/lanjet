@@ -78,8 +78,29 @@ pub async fn index_page(
                 style { (inline_css()) }
             }
             body {
-                div class="container" {
+                div class="header" {
                     h1 { "✈️ LanJet" }
+                    div class="sort-bar" {
+                        span { "Sort:" }
+                        a
+                            class={ @if matches!(query.sort, SortKey::Name) { "active" } @else { "" } }
+                            href="/?sort=name"
+                        { "Name" }
+                        span class="sep" { "·" }
+                        a
+                            class={ @if matches!(query.sort, SortKey::Size) { "active" } @else { "" } }
+                            href="/?sort=size"
+                        { "Size" }
+                        span class="order" {
+                            @if matches!(query.order, SortOrder::Asc) {
+                                a href="/?sort=size&order=desc" { "↑" }
+                            } @else {
+                                a href="/?sort=size&order=asc" { "↓" }
+                            }
+                        }
+                    }
+                }
+                div class="container" {
                     ul {
                         @for file in &files {
                             li {
