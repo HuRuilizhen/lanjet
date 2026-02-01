@@ -28,6 +28,15 @@ impl Default for SortKey {
     }
 }
 
+impl SortKey {
+    fn as_string(&self) -> &'static str {
+        match self {
+            SortKey::Name => "name",
+            SortKey::Size => "size",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum SortOrder {
@@ -41,10 +50,19 @@ impl Default for SortOrder {
     }
 }
 
+impl SortOrder {
+    fn as_string(&self) -> &'static str {
+        match self {
+            SortOrder::Asc => "asc",
+            SortOrder::Desc => "desc",
+        }
+    }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct IndexQuery {
     #[serde(default)]
-    pub sort: SortKey,
+    pub key: SortKey,
 
     #[serde(default)]
     pub order: SortOrder,
@@ -57,7 +75,7 @@ pub async fn index_page(
     let mut files: Vec<String> = state.path_set.iter().cloned().collect();
     let meta_data = &state.meta_data;
 
-    match query.sort {
+    match query.key {
         SortKey::Name => {
             files.sort();
         }
@@ -83,19 +101,19 @@ pub async fn index_page(
                     div class="sort-bar" {
                         span { "Sort:" }
                         a
-                            class={ @if matches!(query.sort, SortKey::Name) { "active" } @else { "" } }
-                            href="/?sort=name"
+                            class={ @if matches!(query.key, SortKey::Name) { "active" } @else { "" } }
+                            href=(format!("/?key={}&order={}", SortKey::Name.as_string(), query.order.as_string()))
                         { "Name" }
                         span class="sep" { "·" }
                         a
-                            class={ @if matches!(query.sort, SortKey::Size) { "active" } @else { "" } }
-                            href="/?sort=size"
+                            class={ @if matches!(query.key, SortKey::Size) { "active" } @else { "" } }
+                            href=(format!("/?key={}&order={}", SortKey::Size.as_string(), query.order.as_string()))
                         { "Size" }
                         span class="order" {
                             @if matches!(query.order, SortOrder::Asc) {
-                                a href="/?sort=size&order=desc" { "↑" }
+                                a href=( format!("/?key={}&order={}", query.key.as_string(), SortOrder::Desc.as_string()) ) { "↑" }
                             } @else {
-                                a href="/?sort=size&order=asc" { "↓" }
+                                a href=( format!("/?key={}&order={}", query.key.as_string(), SortOrder::Asc.as_string()) ) { "↓" }
                             }
                         }
                     }
