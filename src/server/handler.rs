@@ -3,19 +3,72 @@ use crate::util::human_size;
 use axum::Json;
 use axum::body::Body;
 use axum::extract::Path as AxumPath;
+use axum::extract::Query;
 use axum::extract::State as AxumState;
 use axum::http::{StatusCode, header};
 use axum::response::{Html, IntoResponse, Response};
 use maud::{Markup, html};
 use mime_guess::from_path;
+use serde::Deserialize;
 use serde_json::json;
 use std::path::PathBuf;
 use tokio_util::io::ReaderStream;
 use urlencoding::encode;
 
-pub async fn index_page(AxumState(state): AxumState<AppState>) -> impl IntoResponse {
-    let files = &state.path_set;
+#[derive(Debug, Clone, Copy, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum SortKey {
+    Name,
+    Size,
+}
+
+impl Default for SortKey {
+    fn default() -> Self {
+        SortKey::Name
+    }
+}
+
+#[derive(Debug, Clone, Copy, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum SortOrder {
+    Asc,
+    Desc,
+}
+
+impl Default for SortOrder {
+    fn default() -> Self {
+        SortOrder::Asc
+    }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct IndexQuery {
+    #[serde(default)]
+    pub sort: SortKey,
+
+    #[serde(default)]
+    pub order: SortOrder,
+}
+
+pub async fn index_page(
+    AxumState(state): AxumState<AppState>,
+    Query(query): Query<IndexQuery>,
+) -> impl IntoResponse {
+    let mut files: Vec<String> = state.path_set.iter().cloned().collect();
     let meta_data = &state.meta_data;
+
+    match query.sort {
+        SortKey::Name => {
+            files.sort();
+        }
+        SortKey::Size => {
+            files.sort_by_key(|f| state.meta_data[f].len());
+        }
+    }
+
+    if matches!(query.order, SortOrder::Asc) {
+        files.reverse();
+    }
 
     let markup: Markup = html! {
         html {
@@ -28,12 +81,12 @@ pub async fn index_page(AxumState(state): AxumState<AppState>) -> impl IntoRespo
                 div class="container" {
                     h1 { "✈️ LanJet" }
                     ul {
-                        @for file in files {
+                        @for file in &files {
                             li {
                                 div class="file-name" {
                                     @let encoded = encode(file);
 
-                                    (file_icon(file))
+                                    (file_icon(file.clone()))
                                     a href=(format!("/file/{}", encoded)) { (file) }
                                 }
                                 span class="file-size" {
