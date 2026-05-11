@@ -8,7 +8,7 @@ use crate::cli::{BannerContext, ServerContext};
 use axum::{Router, routing::get};
 use colored::{self, Colorize};
 use state::AppState;
-use std::{io::Error, process::exit};
+use std::{io::Error, net::SocketAddr, process::exit};
 use tokio::net::TcpListener;
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tracing::Level;
@@ -51,7 +51,10 @@ pub async fn start(
 
     show_banner(banner_context);
 
-    axum::serve(listener, app)
-        .with_graceful_shutdown(shutdown_signal())
-        .await
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .with_graceful_shutdown(shutdown_signal())
+    .await
 }
