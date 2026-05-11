@@ -2,6 +2,7 @@ use super::{state::AppState, style::inline_css, util::file_icon};
 use crate::util::human_size;
 use axum::Json;
 use axum::body::Body;
+use axum::extract::ConnectInfo;
 use axum::extract::Path as AxumPath;
 use axum::extract::State as AxumState;
 use axum::http::{StatusCode, header};
@@ -9,6 +10,7 @@ use axum::response::{Html, IntoResponse, Response};
 use maud::{Markup, html};
 use mime_guess::from_path;
 use serde_json::json;
+use std::net::SocketAddr;
 use std::path::PathBuf;
 use tokio_util::io::ReaderStream;
 use urlencoding::encode;
@@ -58,9 +60,14 @@ pub async fn list_files(AxumState(app_state): AxumState<AppState>) -> impl IntoR
 }
 
 pub async fn download_file(
+    ConnectInfo(remote_addr): ConnectInfo<SocketAddr>,
     AxumState(app_state): AxumState<AppState>,
     AxumPath(path): AxumPath<String>,
 ) -> impl IntoResponse {
+    if !app_state.is_ip_allowed(remote_addr.ip()) {
+        return (StatusCode::FORBIDDEN, "Forbidden").into_response();
+    }
+
     if !app_state.path_set.contains(&path) {
         return (StatusCode::NOT_FOUND, "File not found".to_string()).into_response();
     }
