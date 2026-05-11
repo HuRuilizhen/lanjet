@@ -15,7 +15,14 @@ use std::path::PathBuf;
 use tokio_util::io::ReaderStream;
 use urlencoding::encode;
 
-pub async fn index_page(AxumState(state): AxumState<AppState>) -> impl IntoResponse {
+pub async fn index_page(
+    ConnectInfo(remote_addr): ConnectInfo<SocketAddr>,
+    AxumState(state): AxumState<AppState>,
+) -> impl IntoResponse {
+    if !state.is_ip_allowed(remote_addr.ip()) {
+        return (StatusCode::FORBIDDEN, "Forbidden").into_response();
+    }
+
     let files = &state.path_set;
     let meta_data = &state.meta_data;
 
@@ -52,11 +59,18 @@ pub async fn index_page(AxumState(state): AxumState<AppState>) -> impl IntoRespo
         }
     };
 
-    Html(markup.into_string())
+    Html(markup.into_string()).into_response()
 }
 
-pub async fn list_files(AxumState(app_state): AxumState<AppState>) -> impl IntoResponse {
-    Json(json!(app_state.path_set))
+pub async fn list_files(
+    ConnectInfo(remote_addr): ConnectInfo<SocketAddr>,
+    AxumState(app_state): AxumState<AppState>,
+) -> impl IntoResponse {
+    if !app_state.is_ip_allowed(remote_addr.ip()) {
+        return (StatusCode::FORBIDDEN, "Forbidden").into_response();
+    }
+
+    Json(json!(app_state.path_set)).into_response()
 }
 
 pub async fn download_file(
