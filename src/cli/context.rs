@@ -1,3 +1,4 @@
+use ipnet::IpNet;
 use std::net::SocketAddr;
 use std::path::PathBuf;
 
@@ -6,6 +7,8 @@ pub struct ServerContext {
     pub addr: SocketAddr,
     pub base_dir: PathBuf,
     pub files: Vec<PathBuf>,
+    pub allow_ips: Vec<IpNet>,
+    pub deny_ips: Vec<IpNet>,
 }
 
 #[derive(Debug)]
@@ -17,4 +20,6 @@ pub struct BannerContext {
     pub total_size: u64,
     pub local_only: bool,
     pub show_qrcode: bool,
+    pub allow_ips: Vec<IpNet>,
+    pub deny_ips: Vec<IpNet>,
 }

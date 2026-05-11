@@ -4,6 +4,7 @@ use crate::matcher::Matcher;
 use clap::Parser;
 use colored::Colorize;
 pub use context::{BannerContext, ServerContext};
+use ipnet::IpNet;
 use std::fs::{self, read_dir};
 use std::net::SocketAddr;
 use std::{
@@ -52,6 +53,22 @@ pub struct Args {
 
     #[arg(long, help = "generate qr code in banner")]
     show_qrcode: bool,
+
+    #[arg(
+        long,
+        value_delimiter = ',',
+        value_parser = clap::value_parser!(IpNet),
+        help = "comma-separated list of allowed IPs/CIDRs"
+    )]
+    allow_ips: Vec<IpNet>,
+
+    #[arg(
+        long,
+        value_delimiter = ',',
+        value_parser = clap::value_parser!(IpNet),
+        help = "comma-separated list of blocked IPs/CIDRs"
+    )]
+    deny_ips: Vec<IpNet>,
 }
 
 fn get_files(path: &Path, files: &mut Vec<PathBuf>, matcher: &Matcher) {
@@ -120,6 +137,8 @@ pub fn parse() -> (BannerContext, ServerContext) {
         false => SocketAddr::from(([0, 0, 0, 0], port)),
     };
     let show_qrcode = args.show_qrcode;
+    let allow_ips = args.allow_ips;
+    let deny_ips = args.deny_ips;
 
     (
         BannerContext {
@@ -130,11 +149,15 @@ pub fn parse() -> (BannerContext, ServerContext) {
             total_size,
             local_only,
             show_qrcode,
+            allow_ips: allow_ips.clone(),
+            deny_ips: deny_ips.clone(),
         },
         ServerContext {
             base_dir,
             files,
             addr,
+            allow_ips,
+            deny_ips,
         },
     )
 }

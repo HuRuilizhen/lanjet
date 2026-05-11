@@ -15,6 +15,8 @@ pub fn show_banner(banner_context: BannerContext) {
     let total_size = human_size(banner_context.total_size);
     let show_qr = banner_context.show_qrcode;
     let local_only = banner_context.local_only;
+    let allow_ips = &banner_context.allow_ips;
+    let deny_ips = &banner_context.deny_ips;
     let lan_ip = local_ip().unwrap_or(addr.ip());
 
     println!();
@@ -44,6 +46,28 @@ pub fn show_banner(banner_context: BannerContext) {
     );
     if !local_only {
         println!("{} http://{}:{}", label("🌐 Address:"), lan_ip, addr.port());
+    }
+    if !allow_ips.is_empty() {
+        println!(
+            "{} {}",
+            label("✅ Allow IPs:"),
+            allow_ips
+                .iter()
+                .map(|rule| rule.to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
+    }
+    if !deny_ips.is_empty() {
+        println!(
+            "{} {}",
+            label("⛔ Deny IPs:"),
+            deny_ips
+                .iter()
+                .map(|rule| rule.to_string())
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
     }
 
     if show_qr && !local_only {
